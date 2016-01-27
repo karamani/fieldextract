@@ -124,18 +124,19 @@ func extractOneField(objmap map[string]*json.RawMessage, fieldParts []string) (s
 
 	var innerObjMap map[string]*json.RawMessage = objmap
 
+	lastIndex := len(fieldParts) - 1
 	for i, part := range fieldParts {
-		if i == len(fieldParts)-1 {
-			res, ok := innerObjMap[part]
-			if !ok || res == nil {
-				return "", nil
-			}
-			return string(*res), nil
-		}
 
 		obj, ok := innerObjMap[part]
 		if !ok {
 			return "", nil
+		}
+
+		if i == lastIndex {
+			if obj == nil {
+				return "", nil
+			}
+			return string(*obj), nil
 		}
 
 		err := json.Unmarshal([]byte(*obj), &innerObjMap)
