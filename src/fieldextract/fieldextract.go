@@ -85,7 +85,7 @@ func main() {
 
 func debug(msg string) {
 	if debugMode {
-		fmt.Println("[DEBUG] " + msg)
+		fmt.Println("DEBUG: " + msg)
 	}
 }
 
@@ -105,6 +105,7 @@ func extractFields(jsonString, fieldsString string) (string, error) {
 		fieldParts := strings.Split(oneField, ".")
 		fieldValue, err := extractOneField(objmap, fieldParts)
 		if err != nil {
+			log.Println("ERROR: " + err.Error())
 			fieldValue = ""
 		}
 		if i > 0 {
