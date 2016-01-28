@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/codegangsta/cli"
 	"io"
@@ -17,6 +18,7 @@ var (
 	formatArg    string
 	separatorArg string
 	withNamesArg bool
+	skipEmptyArg bool
 )
 
 func main() {
@@ -51,6 +53,11 @@ func main() {
 			Usage:       "Output field names",
 			Destination: &withNamesArg,
 		},
+		cli.BoolFlag{
+			Name:        "skipempty",
+			Usage:       "skip rows with empty fields",
+			Destination: &skipEmptyArg,
+		},
 	}
 	app.Action = func(c *cli.Context) {
 
@@ -72,8 +79,9 @@ func main() {
 				res, err := extractFields(jsonString, fieldsArg)
 				if err != nil {
 					log.Printf("ERROR: %s\n", err.Error())
+				} else {
+					fmt.Println(res)
 				}
-				fmt.Println(res)
 
 				jsonString = ""
 			}
@@ -108,6 +116,9 @@ func extractFields(jsonString, fieldsString string) (string, error) {
 			log.Println("ERROR: " + err.Error())
 			fieldValue = ""
 		}
+		if skipEmptyArg && len(fieldValue) == 0 {
+			return "", errors.New("Empty field " + oneField)
+		}
 		if i > 0 {
 			res += separatorArg
 		}
@@ -128,7 +139,7 @@ func extractOneField(objmap map[string]*json.RawMessage, fieldParts []string) (s
 	for i, part := range fieldParts {
 
 		obj, ok := innerObjMap[part]
-		if !ok {
+		if !ok || obj == nil {
 			return "", nil
 		}
 
