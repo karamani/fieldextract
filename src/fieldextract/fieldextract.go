@@ -1,15 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/codegangsta/cli"
-	"io"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/codegangsta/cli"
+	"github.com/karamani/iostreams"
 )
 
 var (
@@ -59,32 +59,27 @@ func main() {
 			Destination: &skipEmptyArg,
 		},
 	}
+
 	app.Action = func(c *cli.Context) {
 
-		reader := bufio.NewReader(os.Stdin)
-		jsonString := ""
-		for {
-			bytes, hasMoreInLine, err := reader.ReadLine()
+		// this func's called for each row in stdinы
+		process := func(row []byte) error {
+
+			debug(string(row))
+
+			res, err := extractFields(string(row), fieldsArg)
 			if err != nil {
-				if err != io.EOF {
-					log.Fatalf("ERROR: %s\n", err.Error())
-				}
-				break
+				log.Printf("ERROR: %s\n", err.Error())
+			} else {
+				fmt.Println(res)
 			}
-			jsonString += string(bytes)
-			if !hasMoreInLine {
 
-				debug(jsonString)
+			return nil
+		}
 
-				res, err := extractFields(jsonString, fieldsArg)
-				if err != nil {
-					log.Printf("ERROR: %s\n", err.Error())
-				} else {
-					fmt.Println(res)
-				}
-
-				jsonString = ""
-			}
+		err := iostreams.ProcessStdin(process)
+		if err != nil {
+			log.Panicln(err.Error())
 		}
 	}
 
