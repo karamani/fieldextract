@@ -13,12 +13,13 @@ import (
 )
 
 var (
-	debugMode    bool
-	fieldsArg    string
-	formatArg    string
-	separatorArg string
-	withNamesArg bool
-	skipEmptyArg bool
+	debugMode     bool
+	fieldsArg     string
+	formatArg     string
+	separatorArg  string
+	withNamesArg  bool
+	skipEmptyArg  bool
+	trimQuotesArg bool
 )
 
 func main() {
@@ -52,6 +53,11 @@ func main() {
 			Name:        "withnames",
 			Usage:       "Output field names",
 			Destination: &withNamesArg,
+		},
+		cli.BoolFlag{
+			Name:        "trimquotes",
+			Usage:       "trim quotes",
+			Destination: &trimQuotesArg,
 		},
 		cli.BoolFlag{
 			Name:        "skipempty",
@@ -119,6 +125,9 @@ func extractFields(jsonString, fieldsString string) (string, error) {
 		}
 		if withNamesArg {
 			res += oneField + ":"
+		}
+		if trimQuotesArg {
+			fieldValue = strings.Trim(fieldValue, "\"")
 		}
 		res += fieldValue
 	}
