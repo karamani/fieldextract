@@ -148,9 +148,6 @@ func extractOneField(objmap map[string]*json.RawMessage, fieldParts []string) (s
 		}
 
 		if i == lastIndex {
-			if obj == nil {
-				return "", nil
-			}
 			return string(*obj), nil
 		}
 
